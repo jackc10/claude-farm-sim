@@ -1,4 +1,4 @@
-# File: ui.py
+# File: src/ui.py
 
 import pygame
 import random
@@ -128,7 +128,7 @@ def draw_world(display, world, player):
                 display.blit(texture_atlas.textures['shop'], rect)
 
     # Draw vendor
-    vendor_rect = pygame.Rect(world.vendor.x * TILE_SIZE, (world.vendor.y + 1) * TILE_SIZE + HUD_HEIGHT, TILE_SIZE, TILE_SIZE)
+    vendor_rect = pygame.Rect(world.vendor.x * TILE_SIZE, world.vendor.y * TILE_SIZE + HUD_HEIGHT, TILE_SIZE, TILE_SIZE)
     display.blit(texture_atlas.textures['vendor'], vendor_rect)
 
     # Draw player
