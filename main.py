@@ -2,10 +2,14 @@
 
 import pygame
 import sys
+from game_objects import Player, World
+from ui import draw_world, draw_hud
 
 # Initialize Pygame
 pygame.init()
-pygame.display.init()  # Explicitly initialize the display module
+
+# Explicitly initialize the display module
+pygame.display.init()
 
 # Configuration constants
 WINDOW_WIDTH = 800
@@ -15,10 +19,6 @@ TILE_SIZE = 32
 # Set up display
 display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Claude's Farm Simulation")
-
-# Now import our custom modules
-from game_objects import Player, World
-from ui import draw_world, draw_hud
 
 # Initialize game objects
 world = World(WINDOW_WIDTH // TILE_SIZE, WINDOW_HEIGHT // TILE_SIZE)
@@ -47,14 +47,28 @@ while running:
                 player.interact(world)
             elif event.key == pygame.K_e:
                 player.switch_tool()
+            elif event.key == pygame.K_h:
+                player.harvest(world)
+        
+        # Handle mouse clicks for selling crops
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # Left mouse button
+                mouse_pos = pygame.mouse.get_pos()
+                if sell_button.collidepoint(mouse_pos):
+                    player.sell_crops()
+
+    # Update game state
+    world.update_crops()
 
     # Draw everything
     display.fill((0, 0, 0))  # Clear screen
     draw_world(display, world, player)
-    draw_hud(display, player)
+    sell_button = draw_hud(display, player)
     pygame.display.flip()
 
+    # Cap the frame rate
     clock.tick(60)
 
+# Quit the game
 pygame.quit()
 sys.exit()
