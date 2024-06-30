@@ -36,7 +36,7 @@ A basic 2D farm simulation game built with Python and Pygame.
 
 - Arrow keys: Move the player
 - Space: Interact (plant/harvest)
-- E: Confirm selection
+- E: Switch between tools
 
 ## Contributing
 
