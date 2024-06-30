@@ -6,14 +6,14 @@ class Player:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.inventory = {"seeds": 5, "crops": 0}
+        self.inventory = {"corn_seeds": 5, "corn": 0}
         self.current_tool = "hands"
-        self.money = 0
+        self.money = 100  # Starting money
 
     def move(self, dx, dy, world):
         new_x = self.x + dx
         new_y = self.y + dy
-        if 0 <= new_x < world.width and 0 <= new_y < world.height:
+        if 0 <= new_x < world.width and 0 <= new_y < world.height and world.grid[new_y][new_x] != 7:  # 7 is shop
             self.x = new_x
             self.y = new_y
 
@@ -23,10 +23,11 @@ class Player:
         elif self.current_tool == "hands":
             if world.grid[self.y][self.x] == 6:  # Fully grown crop
                 self.harvest(world)
-            elif self.inventory["seeds"] > 0 and world.grid[self.y][self.x] == 2:  # Tilled soil
+            elif self.inventory["corn_seeds"] > 0 and world.grid[self.y][self.x] == 2:  # Tilled soil
                 self.plant_seed(world)
-            else:
-                print(f"Interacting with tile at ({self.x}, {self.y}) using {self.current_tool}")
+            elif world.is_near_vendor(self.x, self.y):
+                return "open_shop"
+        return None
 
     def till_soil(self, world):
         if world.grid[self.y][self.x] == 0:  # If it's grass
@@ -38,8 +39,8 @@ class Player:
     def plant_seed(self, world):
         if world.grid[self.y][self.x] == 2:  # If it's tilled soil
             world.plant_seed(self.x, self.y)
-            self.inventory["seeds"] -= 1
-            print(f"Planted seed at ({self.x}, {self.y}). {self.inventory['seeds']} seeds left.")
+            self.inventory["corn_seeds"] -= 1
+            print(f"Planted corn seed at ({self.x}, {self.y}). {self.inventory['corn_seeds']} corn seeds left.")
         else:
             print("Can't plant here!")
 
@@ -50,20 +51,36 @@ class Player:
     def harvest(self, world):
         if world.grid[self.y][self.x] == 6:  # Fully grown crop
             world.harvest_crop(self.x, self.y)
-            self.inventory["crops"] += 1
-            print(f"Harvested crop at ({self.x}, {self.y}). Total crops: {self.inventory['crops']}")
+            self.inventory["corn"] += 1
+            print(f"Harvested corn at ({self.x}, {self.y}). Total corn: {self.inventory['corn']}")
         else:
             print("Nothing to harvest here!")
 
-    def sell_crops(self, price_per_crop=10):
-        crops_to_sell = self.inventory["crops"]
-        if crops_to_sell > 0:
-            earned_money = crops_to_sell * price_per_crop
-            self.money += earned_money
-            self.inventory["crops"] = 0
-            print(f"Sold {crops_to_sell} crops for ${earned_money}. New balance: ${self.money}")
-        else:
-            print("No crops to sell!")
+class Vendor:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.inventory = {"corn_seeds": 1000}
+        self.prices = {"corn_seeds": 5, "corn": 10}
+
+    def sell_seeds(self, player, seed_type, amount):
+        if seed_type not in self.inventory or self.inventory[seed_type] < amount:
+            return False
+        cost = self.prices[seed_type] * amount
+        if player.money >= cost:
+            player.money -= cost
+            self.inventory[seed_type] -= amount
+            player.inventory[seed_type] = player.inventory.get(seed_type, 0) + amount
+            return True
+        return False
+
+    def buy_crops(self, player, crop_type, amount):
+        if crop_type not in player.inventory or player.inventory[crop_type] < amount:
+            return False
+        payment = self.prices[crop_type] * amount
+        player.money += payment
+        player.inventory[crop_type] -= amount
+        return True
 
 class World:
     def __init__(self, width, height):
@@ -72,6 +89,15 @@ class World:
         self.grid = [[0 for _ in range(width)] for _ in range(height)]
         self.crops = {}
         self.last_update_time = time.time()
+        self.vendor = self.place_shop()
+
+    def place_shop(self):
+        shop_x, shop_y = self.width - 2, 1
+        self.grid[shop_y][shop_x] = 7  # 7 represents shop
+        return Vendor(shop_x, shop_y - 1)  # Vendor stands in front of the shop
+
+    def is_near_vendor(self, x, y):
+        return abs(x - self.vendor.x) <= 1 and abs(y - self.vendor.y) <= 1
 
     def plant_seed(self, x, y):
         self.grid[y][x] = 3  # 3 represents a newly planted seed

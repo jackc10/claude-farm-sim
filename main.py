@@ -3,7 +3,7 @@
 import pygame
 import sys
 from game_objects import Player, World
-from ui import draw_world, draw_hud, HUD_HEIGHT
+from ui import draw_world, draw_hud, draw_shop_window, HUD_HEIGHT
 
 # Initialize Pygame
 pygame.init()
@@ -11,7 +11,7 @@ pygame.display.init()
 
 # Configuration constants
 WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600 + HUD_HEIGHT  # Increase window height to accommodate HUD
+WINDOW_HEIGHT = 600 + HUD_HEIGHT
 TILE_SIZE = 32
 
 # Set up display
@@ -25,33 +25,48 @@ player = Player(world.width // 2, world.height // 2)
 # Main game loop
 clock = pygame.time.Clock()
 running = True
+shop_open = False
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         
-        # Handle player input
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                player.move(0, -1, world)
-            elif event.key == pygame.K_s:
-                player.move(0, 1, world)
-            elif event.key == pygame.K_a:
-                player.move(-1, 0, world)
-            elif event.key == pygame.K_d:
-                player.move(1, 0, world)
-            elif event.key == pygame.K_SPACE:
-                player.interact(world)
-            elif event.key == pygame.K_e:
-                player.switch_tool()
-        
-        # Handle mouse clicks for selling crops
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # Left mouse button
-                mouse_pos = pygame.mouse.get_pos()
-                if sell_button.collidepoint(mouse_pos):
-                    player.sell_crops()
+        if not shop_open:
+            # Handle player input when shop is closed
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
+                    player.move(0, -1, world)
+                elif event.key == pygame.K_s:
+                    player.move(0, 1, world)
+                elif event.key == pygame.K_a:
+                    player.move(-1, 0, world)
+                elif event.key == pygame.K_d:
+                    player.move(1, 0, world)
+                elif event.key == pygame.K_SPACE:
+                    result = player.interact(world)
+                    if result == "open_shop":
+                        shop_open = True
+                elif event.key == pygame.K_e:
+                    player.switch_tool()
+        else:
+            # Handle shop interactions when shop is open
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse button
+                    mouse_pos = pygame.mouse.get_pos()
+                    if buy_button.collidepoint(mouse_pos):
+                        if world.vendor.sell_seeds(player, "corn_seeds", 1):
+                            print("Bought 1 corn seed")
+                        else:
+                            print("Not enough money or seeds out of stock")
+                    elif sell_button.collidepoint(mouse_pos):
+                        if world.vendor.buy_crops(player, "corn", 1):
+                            print("Sold 1 corn")
+                        else:
+                            print("No corn to sell")
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    shop_open = False
 
     # Update game state
     world.update_crops()
@@ -59,7 +74,11 @@ while running:
     # Draw everything
     display.fill((0, 0, 0))  # Clear screen
     draw_world(display, world, player)
-    sell_button = draw_hud(display, player)
+    draw_hud(display, player)
+    
+    if shop_open:
+        buy_button, sell_button = draw_shop_window(display, player, world.vendor)
+
     pygame.display.flip()
 
     # Cap the frame rate
