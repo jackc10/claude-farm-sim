@@ -8,9 +8,13 @@ TILE_SIZE = 32
 GRASS_COLOR = (34, 139, 34)  # Forest green
 SOIL_COLOR = (139, 69, 19)   # Saddle brown
 TILLED_SOIL_COLOR = (92, 64, 51)  # Darker brown
-HUD_HEIGHT = 60
+HUD_HEIGHT = 100
 HUD_COLOR = (50, 50, 50)  # Dark gray
 SHOP_COLOR = (139, 69, 19)  # Brown for shop building
+HUD_BACKGROUND_COLOR = (50, 50, 50)
+HUD_TEXT_COLOR = (255, 255, 255)
+HUD_HIGHLIGHT_COLOR = (255, 200, 0)
+HUD_SECTION_COLOR = (70, 70, 70)
 
 class TextureAtlas:
     def __init__(self, world_width, world_height):
@@ -137,25 +141,43 @@ def draw_world(display, world, player):
 
 def draw_hud(display, player):
     # Draw HUD background
-    pygame.draw.rect(display, HUD_COLOR, (0, 0, display.get_width(), HUD_HEIGHT))
-
-    font = pygame.font.Font(None, 28)
+    pygame.draw.rect(display, HUD_BACKGROUND_COLOR, (0, 0, display.get_width(), HUD_HEIGHT))
     
-    # Display current tool
-    tool_text = font.render(f"Tool: {player.current_tool.capitalize()}", True, (255, 255, 255))
-    display.blit(tool_text, (20, 20))
+    # Create a custom font
+    font = pygame.font.Font(None, 24)
+    large_font = pygame.font.Font(None, 32)
+    
+    # Draw sections
+    section_width = display.get_width() // 4
+    for i in range(4):
+        pygame.draw.rect(display, HUD_SECTION_COLOR, (i * section_width, 0, section_width, HUD_HEIGHT))
+        pygame.draw.line(display, HUD_HIGHLIGHT_COLOR, (i * section_width, 0), (i * section_width, HUD_HEIGHT), 2)
+    
+    # Player info section
+    player_info = large_font.render("Player Info", True, HUD_HIGHLIGHT_COLOR)
+    display.blit(player_info, (20, 10))
+    tool_text = font.render(f"Tool: {player.current_tool.capitalize()}", True, HUD_TEXT_COLOR)
+    display.blit(tool_text, (20, 40))
 
-    # Display money
-    money_text = font.render(f"Money: ${player.money}", True, (255, 255, 255))
-    display.blit(money_text, (200, 20))
+    # Inventory section
+    inventory_text = large_font.render("Inventory", True, HUD_HIGHLIGHT_COLOR)
+    display.blit(inventory_text, (section_width + 20, 10))
+    seed_text = font.render(f"Seeds: {player.inventory['corn_seeds']}", True, HUD_TEXT_COLOR)
+    display.blit(seed_text, (section_width + 20, 40))
+    crop_text = font.render(f"Corn: {player.inventory['corn']}", True, HUD_TEXT_COLOR)
+    display.blit(crop_text, (section_width + 20, 70))
 
-    # Display seed count
-    seed_text = font.render(f"Corn Seeds: {player.inventory['corn_seeds']}", True, (255, 255, 255))
-    display.blit(seed_text, (400, 20))
+    # Money section
+    money_text = large_font.render("Money", True, HUD_HIGHLIGHT_COLOR)
+    display.blit(money_text, (2 * section_width + 20, 10))
+    money_value = font.render(f"${player.money}", True, HUD_TEXT_COLOR)
+    display.blit(money_value, (2 * section_width + 20, 40))
 
-    # Display crop count
-    crop_text = font.render(f"Corn: {player.inventory['corn']}", True, (255, 255, 255))
-    display.blit(crop_text, (600, 20))
+    # Time section (placeholder for future implementation)
+    time_text = large_font.render("Time", True, HUD_HIGHLIGHT_COLOR)
+    display.blit(time_text, (3 * section_width + 20, 10))
+    day_text = font.render("Day 1", True, HUD_TEXT_COLOR)  # Placeholder
+    display.blit(day_text, (3 * section_width + 20, 40))
 
 def draw_shop_window(display, player, vendor):
     window_width, window_height = 300, 200
