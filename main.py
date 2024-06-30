@@ -7,8 +7,6 @@ from ui import draw_world, draw_hud
 
 # Initialize Pygame
 pygame.init()
-
-# Explicitly initialize the display module
 pygame.display.init()
 
 # Configuration constants
