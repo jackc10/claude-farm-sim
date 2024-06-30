@@ -7,7 +7,6 @@ A basic 2D farm simulation game built with Python and Pygame.
 - 2D grid-based farm layout
 - Player movement
 - Crop planting and harvesting
-- Day/night cycle
 - Simple economy system
 
 ## Requirements
