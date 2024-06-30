@@ -1,16 +1,38 @@
 # File: src/world.py
 
 import time
-from entities import Vendor
+from .entities import Vendor
+from .config import calculate_grid_size, calculate_tile_size
 
 class World:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.grid = [[0 for _ in range(width)] for _ in range(height)]
+    def __init__(self, screen_width, screen_height):
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.width, self.height = calculate_grid_size(screen_width, screen_height)
+        self.tile_size = calculate_tile_size(screen_width, screen_height)
+        self.grid = [[0 for _ in range(self.width)] for _ in range(self.height)]
         self.crops = {}
         self.last_update_time = time.time()
         self.vendor = self.place_shop()
+
+    def recalculate_grid(self, screen_width, screen_height):
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        new_width, new_height = calculate_grid_size(screen_width, screen_height)
+        new_tile_size = calculate_tile_size(screen_width, screen_height)
+        
+        # Resize grid if necessary
+        if new_width != self.width or new_height != self.height:
+            new_grid = [[0 for _ in range(new_width)] for _ in range(new_height)]
+            for y in range(min(self.height, new_height)):
+                for x in range(min(self.width, new_width)):
+                    new_grid[y][x] = self.grid[y][x]
+            self.grid = new_grid
+            self.width, self.height = new_width, new_height
+        
+        self.tile_size = new_tile_size
+        self.vendor.x = min(self.vendor.x, self.width - 1)
+        self.vendor.y = min(self.vendor.y, self.height - 1)
 
     def place_shop(self):
         shop_x, shop_y = self.width - 2, 1

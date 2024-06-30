@@ -2,8 +2,8 @@
 
 import pygame
 import sys
-from game import Game
-from ui import HUD_HEIGHT
+from .game import Game
+from .ui import HUD_HEIGHT
 
 # Initialize Pygame
 pygame.init()
@@ -18,7 +18,7 @@ display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Claude's Farm Simulation")
 
 # Initialize game
-game = Game(WINDOW_WIDTH // 32, (WINDOW_HEIGHT - HUD_HEIGHT) // 32)
+game = Game(WINDOW_WIDTH, WINDOW_HEIGHT - HUD_HEIGHT)
 
 # Main game loop
 clock = pygame.time.Clock()

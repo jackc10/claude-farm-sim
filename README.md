@@ -28,7 +28,7 @@ A basic 2D farm simulation game built with Python and Pygame.
 
 3. Run the game:
    ```
-   python main.py
+   python -m src.main
    ```
 
 ## Controls

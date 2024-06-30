@@ -1,13 +1,15 @@
 # File: src/game.py
 
 import pygame
-from entities import Player
-from world import World
-from ui import draw_world, draw_hud, draw_shop_window
+from .entities import Player
+from .world import World
+from .ui import draw_world, draw_hud, draw_shop_window
 
 class Game:
-    def __init__(self, width, height):
-        self.world = World(width, height)
+    def __init__(self, screen_width, screen_height):
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.world = World(screen_width, screen_height)
         self.player = Player(self.world.width // 2, self.world.height // 2)
         self.shop_open = False
         self.shop_buttons = None
