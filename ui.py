@@ -8,6 +8,8 @@ TILE_SIZE = 32
 GRASS_COLOR = (34, 139, 34)  # Forest green
 SOIL_COLOR = (139, 69, 19)   # Saddle brown
 TILLED_SOIL_COLOR = (92, 64, 51)  # Darker brown
+HUD_HEIGHT = 60
+HUD_COLOR = (50, 50, 50)  # Dark gray
 
 class TextureAtlas:
     def __init__(self, world_width, world_height):
@@ -88,7 +90,7 @@ def draw_world(display, world, player):
 
     for y in range(world.height):
         for x in range(world.width):
-            rect = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+            rect = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE + HUD_HEIGHT, TILE_SIZE, TILE_SIZE)
             if world.grid[y][x] == 0:  # Grass
                 display.blit(texture_atlas.grass_grid[y][x], rect)
             elif world.grid[y][x] == 1:  # Untilled soil
@@ -105,27 +107,36 @@ def draw_world(display, world, player):
                     display.blit(glow_surf, rect)
 
     # Draw player
-    player_rect = pygame.Rect(player.x * TILE_SIZE, player.y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+    player_rect = pygame.Rect(player.x * TILE_SIZE, player.y * TILE_SIZE + HUD_HEIGHT, TILE_SIZE, TILE_SIZE)
     pygame.draw.rect(display, (255, 0, 0), player_rect)  # Simple red rectangle for now
 
 def draw_hud(display, player):
-    font = pygame.font.Font(None, 36)
-    position_text = font.render(f"Position: ({player.x}, {player.y})", True, (255, 255, 255))
-    tool_text = font.render(f"Tool: {player.current_tool}", True, (255, 255, 255))
-    seed_text = font.render(f"Seeds: {player.inventory['seeds']}", True, (255, 255, 255))
-    crop_text = font.render(f"Crops: {player.inventory['crops']}", True, (255, 255, 255))
-    money_text = font.render(f"Money: ${player.money}", True, (255, 255, 255))
+    # Draw HUD background
+    pygame.draw.rect(display, HUD_COLOR, (0, 0, display.get_width(), HUD_HEIGHT))
+
+    font = pygame.font.Font(None, 28)
     
-    display.blit(position_text, (10, 10))
-    display.blit(tool_text, (10, 50))
-    display.blit(seed_text, (10, 90))
-    display.blit(crop_text, (10, 130))
-    display.blit(money_text, (10, 170))
+    # Display current tool
+    tool_text = font.render(f"Tool: {player.current_tool.capitalize()}", True, (255, 255, 255))
+    display.blit(tool_text, (20, 20))
+
+    # Display money
+    money_text = font.render(f"Money: ${player.money}", True, (255, 255, 255))
+    display.blit(money_text, (200, 20))
+
+    # Display seed count
+    seed_text = font.render(f"Seeds: {player.inventory['seeds']}", True, (255, 255, 255))
+    display.blit(seed_text, (400, 20))
+
+    # Display crop count
+    crop_text = font.render(f"Crops: {player.inventory['crops']}", True, (255, 255, 255))
+    display.blit(crop_text, (600, 20))
 
     # Draw sell button
-    sell_button = pygame.Rect(10, 210, 100, 50)
+    sell_button = pygame.Rect(display.get_width() - 120, 10, 100, 40)
     pygame.draw.rect(display, (0, 255, 0), sell_button)
     sell_text = font.render("Sell Crops", True, (0, 0, 0))
-    display.blit(sell_text, (15, 225))
+    text_rect = sell_text.get_rect(center=sell_button.center)
+    display.blit(sell_text, text_rect)
 
     return sell_button  # Return the button rect for click detection

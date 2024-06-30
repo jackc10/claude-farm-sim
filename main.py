@@ -3,7 +3,7 @@
 import pygame
 import sys
 from game_objects import Player, World
-from ui import draw_world, draw_hud
+from ui import draw_world, draw_hud, HUD_HEIGHT
 
 # Initialize Pygame
 pygame.init()
@@ -11,7 +11,7 @@ pygame.display.init()
 
 # Configuration constants
 WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600
+WINDOW_HEIGHT = 600 + HUD_HEIGHT  # Increase window height to accommodate HUD
 TILE_SIZE = 32
 
 # Set up display
@@ -19,7 +19,7 @@ display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Claude's Farm Simulation")
 
 # Initialize game objects
-world = World(WINDOW_WIDTH // TILE_SIZE, WINDOW_HEIGHT // TILE_SIZE)
+world = World(WINDOW_WIDTH // TILE_SIZE, (WINDOW_HEIGHT - HUD_HEIGHT) // TILE_SIZE)
 player = Player(world.width // 2, world.height // 2)
 
 # Main game loop
