@@ -5,10 +5,7 @@ import sys
 
 # Initialize Pygame
 pygame.init()
-
-# Now import our custom modules
-from game_objects import Player, World
-from ui import draw_world, draw_hud
+pygame.display.init()  # Explicitly initialize the display module
 
 # Configuration constants
 WINDOW_WIDTH = 800
@@ -18,6 +15,10 @@ TILE_SIZE = 32
 # Set up display
 display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Claude's Farm Simulation")
+
+# Now import our custom modules
+from game_objects import Player, World
+from ui import draw_world, draw_hud
 
 # Initialize game objects
 world = World(WINDOW_WIDTH // TILE_SIZE, WINDOW_HEIGHT // TILE_SIZE)
@@ -44,6 +45,8 @@ while running:
                 player.move(1, 0, world)
             elif event.key == pygame.K_SPACE:
                 player.interact(world)
+            elif event.key == pygame.K_e:
+                player.switch_tool()
 
     # Draw everything
     display.fill((0, 0, 0))  # Clear screen

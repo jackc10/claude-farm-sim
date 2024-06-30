@@ -4,7 +4,8 @@ class Player:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.inventory = []  # We'll implement this later
+        self.inventory = []
+        self.current_tool = "hands"
 
     def move(self, dx, dy, world):
         new_x = self.x + dx
@@ -14,9 +15,21 @@ class Player:
             self.y = new_y
 
     def interact(self, world):
-        # This is where we'll implement interaction with the world
-        # For now, let's just print a message
-        print(f"Interacting with tile at ({self.x}, {self.y})")
+        if self.current_tool == "hoe":
+            self.till_soil(world)
+        else:
+            print(f"Interacting with tile at ({self.x}, {self.y}) using {self.current_tool}")
+
+    def till_soil(self, world):
+        if world.grid[self.y][self.x] == 0:  # If it's grass
+            world.grid[self.y][self.x] = 2  # 2 will represent tilled soil
+            print(f"Tilled soil at ({self.x}, {self.y})")
+        else:
+            print("Can't till here!")
+
+    def switch_tool(self):
+        self.current_tool = "hoe" if self.current_tool == "hands" else "hands"
+        print(f"Switched to {self.current_tool}")
 
 class World:
     def __init__(self, width, height):
@@ -26,4 +39,4 @@ class World:
         # Initialize world (add some soil tiles, etc.)
         for i in range(5, 10):
             for j in range(5, 10):
-                self.grid[i][j] = 1  # 1 represents soil
+                self.grid[i][j] = 1  # 1 represents untilled soil
