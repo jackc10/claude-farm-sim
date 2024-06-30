@@ -47,8 +47,6 @@ while running:
                 player.interact(world)
             elif event.key == pygame.K_e:
                 player.switch_tool()
-            elif event.key == pygame.K_h:
-                player.harvest(world)
         
         # Handle mouse clicks for selling crops
         if event.type == pygame.MOUSEBUTTONDOWN:

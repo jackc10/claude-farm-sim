@@ -20,10 +20,13 @@ class Player:
     def interact(self, world):
         if self.current_tool == "hoe":
             self.till_soil(world)
-        elif self.current_tool == "hands" and self.inventory["seeds"] > 0:
-            self.plant_seed(world)
-        else:
-            print(f"Interacting with tile at ({self.x}, {self.y}) using {self.current_tool}")
+        elif self.current_tool == "hands":
+            if world.grid[self.y][self.x] == 6:  # Fully grown crop
+                self.harvest(world)
+            elif self.inventory["seeds"] > 0 and world.grid[self.y][self.x] == 2:  # Tilled soil
+                self.plant_seed(world)
+            else:
+                print(f"Interacting with tile at ({self.x}, {self.y}) using {self.current_tool}")
 
     def till_soil(self, world):
         if world.grid[self.y][self.x] == 0:  # If it's grass
@@ -77,7 +80,7 @@ class World:
     def update_crops(self):
         current_time = time.time()
         if current_time - self.last_update_time >= 5:  # Check if 5 seconds have passed
-            for (x, y), crop in self.crops.items():
+            for (x, y), crop in list(self.crops.items()):
                 growth_time = current_time - crop["plant_time"]
                 if growth_time >= 30:  # Fully grown after 30 seconds
                     self.grid[y][x] = 6  # 6 represents a fully grown crop
