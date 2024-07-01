@@ -39,9 +39,12 @@ while running:
 
     game.update()
 
+    # Get current mouse position
+    mouse_pos = pygame.mouse.get_pos()
+
     # Draw everything
     display.fill((0, 0, 0))  # Clear screen
-    game.draw(display)
+    game.draw(display, mouse_pos)
     pygame.display.flip()
 
     # Cap the frame rate

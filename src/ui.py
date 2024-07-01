@@ -15,6 +15,7 @@ HUD_BACKGROUND_COLOR = (50, 50, 50)
 HUD_TEXT_COLOR = (255, 255, 255)
 HUD_HIGHLIGHT_COLOR = (255, 200, 0)
 HUD_SECTION_COLOR = (70, 70, 70)
+ICON_SIZE = 32
 
 class TextureAtlas:
     def __init__(self, world_width, world_height):
@@ -139,11 +140,26 @@ def draw_world(display, world, player):
     player_rect = pygame.Rect(player.x * TILE_SIZE, player.y * TILE_SIZE + HUD_HEIGHT, TILE_SIZE, TILE_SIZE)
     pygame.draw.rect(display, (255, 0, 0), player_rect)  # Simple red rectangle for now
 
-def draw_hud(display, player):
+def draw_icon(surface, icon_type, x, y):
+    icon_rect = pygame.Rect(x, y, ICON_SIZE, ICON_SIZE)
+    if icon_type == 'hoe':
+        pygame.draw.rect(surface, (139, 69, 19), icon_rect)  # Brown rectangle for hoe
+        pygame.draw.line(surface, (210, 180, 140), (x, y + ICON_SIZE), (x + ICON_SIZE, y), 4)  # Hoe blade
+    elif icon_type == 'hands':
+        pygame.draw.circle(surface, (255, 224, 189), (x + ICON_SIZE//2, y + ICON_SIZE//2), ICON_SIZE//2)  # Skin color circle
+        pygame.draw.line(surface, (0, 0, 0), (x + 10, y + 10), (x + ICON_SIZE - 10, y + ICON_SIZE - 10), 2)  # Palm line
+    elif icon_type == 'seed':
+        pygame.draw.ellipse(surface, (210, 180, 140), icon_rect)  # Seed shape
+    elif icon_type == 'corn':
+        pygame.draw.rect(surface, (255, 255, 0), icon_rect)  # Yellow rectangle for corn
+        pygame.draw.line(surface, (0, 100, 0), (x + ICON_SIZE//2, y), (x + ICON_SIZE//2, y - 10), 2)  # Corn stalk
+    return icon_rect
+
+def draw_hud(display, player, mouse_pos):
     # Draw HUD background
     pygame.draw.rect(display, HUD_BACKGROUND_COLOR, (0, 0, display.get_width(), HUD_HEIGHT))
     
-    # Create a custom font
+    # Create fonts
     font = pygame.font.Font(None, 24)
     large_font = pygame.font.Font(None, 32)
     
@@ -156,28 +172,42 @@ def draw_hud(display, player):
     # Player info section
     player_info = large_font.render("Player Info", True, HUD_HIGHLIGHT_COLOR)
     display.blit(player_info, (20, 10))
-    tool_text = font.render(f"Tool: {player.current_tool.capitalize()}", True, HUD_TEXT_COLOR)
-    display.blit(tool_text, (20, 40))
+    
+    tool_icon_rect = draw_icon(display, player.current_tool, 20, 40)
+    tool_text = font.render(player.current_tool.capitalize(), True, HUD_TEXT_COLOR)
+    display.blit(tool_text, (60, 50))
+    
+    if tool_icon_rect.collidepoint(mouse_pos):
+        pygame.draw.rect(display, HUD_HIGHLIGHT_COLOR, tool_icon_rect, 2)  # Highlight on hover
 
     # Inventory section
     inventory_text = large_font.render("Inventory", True, HUD_HIGHLIGHT_COLOR)
     display.blit(inventory_text, (section_width + 20, 10))
-    seed_text = font.render(f"Seeds: {player.inventory['corn_seeds']}", True, HUD_TEXT_COLOR)
-    display.blit(seed_text, (section_width + 20, 40))
-    crop_text = font.render(f"Corn: {player.inventory['corn']}", True, HUD_TEXT_COLOR)
-    display.blit(crop_text, (section_width + 20, 70))
+    
+    seed_icon_rect = draw_icon(display, 'seed', section_width + 20, 40)
+    seed_text = font.render(f": {player.inventory['corn_seeds']}", True, HUD_TEXT_COLOR)
+    display.blit(seed_text, (section_width + 60, 50))
+    
+    corn_icon_rect = draw_icon(display, 'corn', section_width + 20, 80)
+    corn_text = font.render(f": {player.inventory['corn']}", True, HUD_TEXT_COLOR)
+    display.blit(corn_text, (section_width + 60, 90))
+    
+    if seed_icon_rect.collidepoint(mouse_pos):
+        pygame.draw.rect(display, HUD_HIGHLIGHT_COLOR, seed_icon_rect, 2)  # Highlight on hover
+    if corn_icon_rect.collidepoint(mouse_pos):
+        pygame.draw.rect(display, HUD_HIGHLIGHT_COLOR, corn_icon_rect, 2)  # Highlight on hover
 
     # Money section
     money_text = large_font.render("Money", True, HUD_HIGHLIGHT_COLOR)
     display.blit(money_text, (2 * section_width + 20, 10))
     money_value = font.render(f"${player.money}", True, HUD_TEXT_COLOR)
-    display.blit(money_value, (2 * section_width + 20, 40))
+    display.blit(money_value, (2 * section_width + 20, 50))
 
     # Time section (placeholder for future implementation)
     time_text = large_font.render("Time", True, HUD_HIGHLIGHT_COLOR)
     display.blit(time_text, (3 * section_width + 20, 10))
     day_text = font.render("Day 1", True, HUD_TEXT_COLOR)  # Placeholder
-    display.blit(day_text, (3 * section_width + 20, 40))
+    display.blit(day_text, (3 * section_width + 20, 50))
 
 def draw_shop_window(display, player, vendor):
     window_width, window_height = 300, 200

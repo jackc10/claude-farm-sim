@@ -17,9 +17,9 @@ class Game:
     def update(self):
         self.world.update_crops()
 
-    def draw(self, display):
+    def draw(self, display, mouse_pos):
         draw_world(display, self.world, self.player)
-        draw_hud(display, self.player)
+        draw_hud(display, self.player, mouse_pos)
         if self.shop_open:
             self.shop_buttons = draw_shop_window(display, self.player, self.world.vendor)
 
